@@ -10,13 +10,13 @@ var Q = thrift.Q;
 
 var ttypes = module.exports = {};
 Base = module.exports.Base = function(args) {
-  this.msgID = null;
+  this.id = null;
   this.sender = null;
   if (args) {
-    if (args.msgID !== undefined && args.msgID !== null) {
-      this.msgID = args.msgID;
+    if (args.id !== undefined && args.id !== null) {
+      this.id = args.id;
     } else {
-      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field msgID is unset!');
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field id is unset!');
     }
     if (args.sender !== undefined && args.sender !== null) {
       this.sender = args.sender;
@@ -41,7 +41,7 @@ Base.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.msgID = input.readString();
+        this.id = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -64,9 +64,9 @@ Base.prototype.read = function(input) {
 
 Base.prototype.write = function(output) {
   output.writeStructBegin('Base');
-  if (this.msgID !== null && this.msgID !== undefined) {
-    output.writeFieldBegin('msgID', Thrift.Type.STRING, 1);
-    output.writeString(this.msgID);
+  if (this.id !== null && this.id !== undefined) {
+    output.writeFieldBegin('id', Thrift.Type.STRING, 1);
+    output.writeString(this.id);
     output.writeFieldEnd();
   }
   if (this.sender !== null && this.sender !== undefined) {
@@ -237,76 +237,6 @@ CMsg.prototype.write = function(output) {
   return;
 };
 
-Res = module.exports.Res = function(args) {
-  this.err = null;
-  this.result = null;
-  if (args) {
-    if (args.err !== undefined && args.err !== null) {
-      this.err = args.err;
-    } else {
-      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field err is unset!');
-    }
-    if (args.result !== undefined && args.result !== null) {
-      this.result = args.result;
-    } else {
-      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field result is unset!');
-    }
-  }
-};
-Res.prototype = {};
-Res.prototype.read = function(input) {
-  input.readStructBegin();
-  while (true)
-  {
-    var ret = input.readFieldBegin();
-    var fname = ret.fname;
-    var ftype = ret.ftype;
-    var fid = ret.fid;
-    if (ftype == Thrift.Type.STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-      if (ftype == Thrift.Type.STRING) {
-        this.err = input.readString();
-      } else {
-        input.skip(ftype);
-      }
-      break;
-      case 2:
-      if (ftype == Thrift.Type.STRING) {
-        this.result = input.readString();
-      } else {
-        input.skip(ftype);
-      }
-      break;
-      default:
-        input.skip(ftype);
-    }
-    input.readFieldEnd();
-  }
-  input.readStructEnd();
-  return;
-};
-
-Res.prototype.write = function(output) {
-  output.writeStructBegin('Res');
-  if (this.err !== null && this.err !== undefined) {
-    output.writeFieldBegin('err', Thrift.Type.STRING, 1);
-    output.writeString(this.err);
-    output.writeFieldEnd();
-  }
-  if (this.result !== null && this.result !== undefined) {
-    output.writeFieldBegin('result', Thrift.Type.STRING, 2);
-    output.writeString(this.result);
-    output.writeFieldEnd();
-  }
-  output.writeFieldStop();
-  output.writeStructEnd();
-  return;
-};
-
 RMsg = module.exports.RMsg = function(args) {
   this.base = null;
   this.res = null;
@@ -317,7 +247,7 @@ RMsg = module.exports.RMsg = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field base is unset!');
     }
     if (args.res !== undefined && args.res !== null) {
-      this.res = new ttypes.Res(args.res);
+      this.res = args.res;
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field res is unset!');
     }
@@ -346,9 +276,8 @@ RMsg.prototype.read = function(input) {
       }
       break;
       case 2:
-      if (ftype == Thrift.Type.STRUCT) {
-        this.res = new ttypes.Res();
-        this.res.read(input);
+      if (ftype == Thrift.Type.STRING) {
+        this.res = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -370,8 +299,8 @@ RMsg.prototype.write = function(output) {
     output.writeFieldEnd();
   }
   if (this.res !== null && this.res !== undefined) {
-    output.writeFieldBegin('res', Thrift.Type.STRUCT, 2);
-    this.res.write(output);
+    output.writeFieldBegin('res', Thrift.Type.STRING, 2);
+    output.writeString(this.res);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -379,21 +308,25 @@ RMsg.prototype.write = function(output) {
   return;
 };
 
-UncaughtException = module.exports.UncaughtException = function(args) {
-  Thrift.TException.call(this, "UncaughtException")
-  this.name = "UncaughtException"
+ThriftCallingException = module.exports.ThriftCallingException = function(args) {
+  Thrift.TException.call(this, "ThriftCallingException")
+  this.name = "ThriftCallingException"
   this.err = null;
+  this.message = null;
   if (args) {
     if (args.err !== undefined && args.err !== null) {
       this.err = args.err;
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field err is unset!');
     }
+    if (args.message !== undefined && args.message !== null) {
+      this.message = args.message;
+    }
   }
 };
-Thrift.inherits(UncaughtException, Thrift.TException);
-UncaughtException.prototype.name = 'UncaughtException';
-UncaughtException.prototype.read = function(input) {
+Thrift.inherits(ThriftCallingException, Thrift.TException);
+ThriftCallingException.prototype.name = 'ThriftCallingException';
+ThriftCallingException.prototype.read = function(input) {
   input.readStructBegin();
   while (true)
   {
@@ -413,9 +346,13 @@ UncaughtException.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
-      case 0:
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.message = input.readString();
+      } else {
         input.skip(ftype);
-        break;
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -425,11 +362,16 @@ UncaughtException.prototype.read = function(input) {
   return;
 };
 
-UncaughtException.prototype.write = function(output) {
-  output.writeStructBegin('UncaughtException');
+ThriftCallingException.prototype.write = function(output) {
+  output.writeStructBegin('ThriftCallingException');
   if (this.err !== null && this.err !== undefined) {
     output.writeFieldBegin('err', Thrift.Type.STRING, 1);
     output.writeString(this.err);
+    output.writeFieldEnd();
+  }
+  if (this.message !== null && this.message !== undefined) {
+    output.writeFieldBegin('message', Thrift.Type.STRING, 2);
+    output.writeString(this.message);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
