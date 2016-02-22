@@ -15,7 +15,7 @@ struct Base {
 **/
 struct Call {
   1: required string name // service name
-  2: required string method // name[method] - m function
+  2: required string action // service[action]
   3: optional string params // json of params
 }
 

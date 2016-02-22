@@ -14,12 +14,12 @@ const ThriftServer = require('../index').ThriftServer,
 
 // test
 let s = new ThriftServer({
-  handler: [{
+  services: [{
     alias : 'utils',
-    handle: utils
+    service: utils
   }, {
     alias : 'lo',
-    handle: _
+    service: _
   }]
 });
 

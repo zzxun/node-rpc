@@ -81,7 +81,7 @@ Base.prototype.write = function(output) {
 
 Call = module.exports.Call = function(args) {
   this.name = null;
-  this.method = null;
+  this.action = null;
   this.params = null;
   if (args) {
     if (args.name !== undefined && args.name !== null) {
@@ -89,10 +89,10 @@ Call = module.exports.Call = function(args) {
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field name is unset!');
     }
-    if (args.method !== undefined && args.method !== null) {
-      this.method = args.method;
+    if (args.action !== undefined && args.action !== null) {
+      this.action = args.action;
     } else {
-      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field method is unset!');
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field action is unset!');
     }
     if (args.params !== undefined && args.params !== null) {
       this.params = args.params;
@@ -122,7 +122,7 @@ Call.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.method = input.readString();
+        this.action = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -150,9 +150,9 @@ Call.prototype.write = function(output) {
     output.writeString(this.name);
     output.writeFieldEnd();
   }
-  if (this.method !== null && this.method !== undefined) {
-    output.writeFieldBegin('method', Thrift.Type.STRING, 2);
-    output.writeString(this.method);
+  if (this.action !== null && this.action !== undefined) {
+    output.writeFieldBegin('action', Thrift.Type.STRING, 2);
+    output.writeString(this.action);
     output.writeFieldEnd();
   }
   if (this.params !== null && this.params !== undefined) {
