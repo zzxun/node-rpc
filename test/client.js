@@ -11,6 +11,8 @@
 const ThriftClient = require('../index').ThriftClient;
 
 let c = new ThriftClient();
+c.on('log', console.log);
+c.on('error', console.error);
 
 c.call('utils', 'randStr').then(console.log).catch(console.error);
 
