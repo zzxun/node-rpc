@@ -32,7 +32,7 @@ describe('Test thrift services', () => {
 
     // server.on('log', console.log);
     server.on('error', console.error);
-    server.on('listening', () => {
+    server.on('ready', () => {
 
       client = new ThriftClient();
 
@@ -67,7 +67,7 @@ describe('Test thrift services', () => {
     });
 
     it('should be rejected', () => {
-      return client.call('lodash', 'no_such_action').should.be.rejected();
+      return client.call('lodash', 'no_such_action', []).should.be.rejected();
     });
   });
 

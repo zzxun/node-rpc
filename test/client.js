@@ -14,10 +14,7 @@ let c = new ThriftClient();
 c.on('log', console.log);
 c.on('error', console.error);
 
-c.call('utils', 'randStr').then(console.log).catch(console.error);
 
-c.call('utils', 'test').then(console.log).catch(console.error);
+c.call('utils', 'test', []).then(console.log).catch(console.error);
 
-c.call('lo', 'isString', ['a']).then(console.log).catch(console.error);
-
-c.call('lo', 'isString', [1]).then(console.log).catch(console.error);
+c.call('lodash', 'isString', [1]).then(console.log).catch(console.error);

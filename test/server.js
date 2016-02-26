@@ -15,14 +15,13 @@ const ThriftServer = require('../index').ThriftServer,
 // test
 let s = new ThriftServer({
   services: [{
-    alias : 'utils',
+    alias  : 'utils',
     service: utils
   }, {
-    alias : 'lo',
     service: _
   }]
 });
 
 s.on('log', console.log);
 s.on('error', console.error);
-s.on('listening', console.log);
+s.on('ready', console.log);
