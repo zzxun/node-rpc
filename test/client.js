@@ -14,7 +14,10 @@ let c = new ThriftClient();
 c.on('log', console.log);
 c.on('error', console.error);
 
-
 c.call('utils', 'test', []).then(console.log).catch(console.error);
-
 c.call('lodash', 'isString', [1]).then(console.log).catch(console.error);
+
+setInterval(() => {
+  c.call('utils', 'test', []).then(console.log).catch(console.error);
+  c.call('lodash', 'isString', [1]).then(console.log).catch(console.error);
+}, 60000);
