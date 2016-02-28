@@ -38,7 +38,7 @@ server.on('log', console.log);
 server.on('error', console.error);
 server.on('listening', console.log); 
 
-// ThriftServer host: xx.xx.xx.xx , port: 7007  , id: bfx647vi
+// ThriftServer host: xx.xx.xx.xx , port: 7007
 ```
 
 
