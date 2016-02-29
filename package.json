@@ -1,20 +1,37 @@
 {
-  "name": "node-thrift-clouds",
+  "name": "node-thrift-service",
   "version": "0.0.1",
-  "description": "use redis to manage thrift server",
+  "description": "use redis/zookeeper to publish thrift service, manage thrift server/client",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "mocha test/test.js"
+  },
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzxun/node-thrift-service.git"
   },
   "keywords": [
     "thrift",
     "node",
-    "redis"
+    "redis",
+    "zookeeper"
   ],
   "author": "zzxun <xtkml.g@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.1.1",
     "lodash": "^4.0.0",
-    "thrift": "^0.9.3"
+    "redis": "^2.4.2",
+    "thrift": "^0.9.3",
+    "zookeeper": "^3.4.7-2"
+  },
+  "engines": {
+    "node": ">= 4.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "should": "^8.2.2",
+    "should-promised": "^0.3.1"
   }
 }

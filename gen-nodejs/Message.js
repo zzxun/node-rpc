@@ -68,7 +68,7 @@ Message_call_args.prototype.write = function(output) {
 Message_call_result = function(args) {
   this.success = null;
   this.err = null;
-  if (args instanceof ttypes.UncaughtException) {
+  if (args instanceof ttypes.ThriftCallingException) {
     this.err = args;
     return;
   }
@@ -105,7 +105,7 @@ Message_call_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.err = new ttypes.UncaughtException();
+        this.err = new ttypes.ThriftCallingException();
         this.err.read(input);
       } else {
         input.skip(ftype);
@@ -227,7 +227,7 @@ MessageProcessor.prototype.process_call = function(seqid, input, output) {
         output.writeMessageEnd();
         output.flush();
       }, function (err) {
-        if (err instanceof ttypes.UncaughtException) {
+        if (err instanceof ttypes.ThriftCallingException) {
           var result = new Message_call_result(err);
           output.writeMessageBegin("call", Thrift.MessageType.REPLY, seqid);
         } else {
@@ -240,7 +240,7 @@ MessageProcessor.prototype.process_call = function(seqid, input, output) {
       });
   } else {
     this._handler.call(args.msg, function (err, result) {
-      if (err == null || err instanceof ttypes.UncaughtException) {
+      if (err == null || err instanceof ttypes.ThriftCallingException) {
         var result = new Message_call_result((err != null ? err : {success: result}));
         output.writeMessageBegin("call", Thrift.MessageType.REPLY, seqid);
       } else {
