@@ -19,9 +19,13 @@ let s = new ThriftServer({
     service: utils
   }, {
     service: _
-  }]
+  }],
+  adapter: {
+    name: 'zookeeper'
+  }
 });
 
-s.on('log', console.log);
+s.on('debug', console.log);
+s.on('info', console.log);
 s.on('error', console.error);
 s.on('ready', console.log);

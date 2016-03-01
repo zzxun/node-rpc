@@ -1,6 +1,8 @@
-# thrift-node-service
+# node-thrift-service
 
-Unlike other language, `javascript` can use `.apply` to call a `function`, so calling the remote nodejs service only need to transport `name(of service), action(function of service, MUST BE A PROMISE), params`. 
+`node >= 4.0.0`
+
+Unlike other language, `javascript` can use `.apply` to call a `function`, so calling the remote nodejs service only need to transport `alias(of service), action(function of service, MUST BE A PROMISE/SYNC), params`. 
 
 By using `Thrift` , it support two way to use this module: 
 
@@ -13,7 +15,7 @@ Features:
 
 - use redis/zookeeper to publish thrift service
 - caller search the services, using polling to manage thrift clients
-- client subscribe for new services (zookeeper)
+- client subscribe for new services
 
 
 
@@ -137,7 +139,7 @@ client.call('lodash', 'no_such_action').catch(console.error);
 
 # TEST
 
-`npm test`
+`npm test` or `make test` or `make test-cover`
 
 
 
