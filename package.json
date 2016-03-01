@@ -2,22 +2,19 @@
   "name": "node-thrift-service",
   "version": "0.0.1",
   "description": "use redis/zookeeper to publish thrift service, manage thrift server/client",
-  "main": "index.js",
-  "scripts": {
-    "test": "mocha test/test.js"
-  },
+  "author": "zzxun <xtkml.g@gmail.com>",
   "contributors": [],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zzxun/node-thrift-service.git"
+    "url": "git+https://github.com/MZMonster/node-thrift-service"
   },
   "keywords": [
     "thrift",
     "node",
     "redis",
-    "zookeeper"
+    "zookeeper",
+    "service"
   ],
-  "author": "zzxun <xtkml.g@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.1.1",
@@ -29,7 +26,12 @@
   "engines": {
     "node": ">= 4.0.0"
   },
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/test.js"
+  },
   "devDependencies": {
+    "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "should": "^8.2.2",
     "should-promised": "^0.3.1"
