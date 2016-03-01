@@ -1,6 +1,6 @@
 {
   "name": "node-thrift-service",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "use redis/zookeeper to publish thrift service, manage thrift server/client",
   "author": "zzxun <xtkml.g@gmail.com>",
   "contributors": [],
