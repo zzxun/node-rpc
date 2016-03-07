@@ -57,7 +57,7 @@ client.on('ready', console.log);
 client.call('lodash', 'isString', ['a']).then(console.log);
 // true
 
-client.call('lodash', 'no_such_action').catch(console.error);
+client.call('lodash', 'no_such_action', []).catch(console.error);
 // method forbidden
 ```
 
