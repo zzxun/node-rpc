@@ -20,8 +20,8 @@ c.on('info', console.log);
 c.on('error', console.error);
 c.on('ready', () => {
 
-  c.call('utils', 'test', []).then(console.log).catch(console.error);
-  c.call('lodash', 'isString', [1]).then(console.log).catch(console.error);
+  c.call('utils', 'getUnusedPort', [8000]).then(console.log).catch(console.error);
+  c.call('lodash', 'isString', ['a']).then(console.log).catch(console.error);
 
   c.call('utils', 'test', []).then(console.log).catch(console.error);
   c.call('lodash', 'isString', [1]).then(console.log).catch(console.error);

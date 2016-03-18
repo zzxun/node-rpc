@@ -1,6 +1,6 @@
 {
   "name": "node-thrift-service",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "use redis/zookeeper to publish thrift service, manage thrift server/client",
   "author": "zzxun <xtkml.g@gmail.com>",
   "contributors": [],
@@ -17,8 +17,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "bluebird": "~3.1.1",
-    "lodash": "~4.0.0",
+    "bluebird": "~3.3.4",
+    "lodash": "~4.6.0",
     "redis": "~2.4.2",
     "thrift": "~0.9.3",
     "zookeeper": "~3.4.7-2"
