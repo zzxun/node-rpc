@@ -9,15 +9,11 @@ By using `Thrift` , it support two way to use this module:
 1. When calling `nodejs service`, use the inner `msg.thrift`
 2. Using `use-defined.thrift`
 
-
-
 Features:
 
 - use redis/zookeeper to publish thrift service
 - caller search the services, using polling to manage thrift clients
 - client subscribe for new services
-
-
 
 # USAGE
 
@@ -28,17 +24,34 @@ Features:
 ThriftServer
 
 ``` javascript
-server = new ThriftServer({
-  services: {
-    alias  : 'lodash',
-    service: _,
-    actions: ['isString', 'no_such_action']
+const ThriftServer = require('node-thrift-service').ThriftServer;
+
+let server = new ThriftServer({
+    adapter: {
+    name   : 'zookeeper',
+    options: {
+      connect                 : '127.0.0.1:2181',
+      timeout                 : 200000,
+      debug_level             : ZooKeeper.ZOO_LOG_LEVEL_ERROR,
+      host_order_deterministic: false,
+      data_as_buffer          : false
+    }
   }
 });
 
-server.on('log', console.log);
+server.on('debug', console.log);
+server.on('info', console.log);
 server.on('error', console.error);
-server.on('listening', console.log); 
+
+server.on('ready', (info) => {
+  console.log(info);
+
+  server.add({
+    alias  : 'lodash',
+    service: _,
+    actions: ['isString', 'no_such_action']
+  });
+}); 
 
 // ThriftServer host: xx.xx.xx.xx , port: 7007
 ```
@@ -48,17 +61,33 @@ server.on('listening', console.log);
 ThriftClient
 
 ``` javascript
-client = new ThriftClient();
+const ThriftServer = require('node-thrift-service').ThriftClient;
 
-client.on('log', console.log);
+let client = new ThriftClient({
+  adapter: {
+    name   : 'zookeeper',
+    options: {
+      connect                 : '127.0.0.1:2181',
+      timeout                 : 200000,
+      debug_level             : ZooKeeper.ZOO_LOG_LEVEL_ERROR,
+      host_order_deterministic: false,
+      data_as_buffer          : false
+    }
+  }
+});
+
+client.on('debug', console.log);
+client.on('info', console.log);
 client.on('error', console.error);
-client.on('ready', console.log);
 
-client.call('lodash', 'isString', ['a']).then(console.log);
-// true
-
-client.call('lodash', 'no_such_action', []).catch(console.error);
-// method forbidden
+client.on('ready', (info) => {
+  console.log(info);
+  
+  client.call('lodash', 'isString', ['a']).then(console.log);
+  // true
+  client.call('lodash', 'no_such_action', []).catch(console.error);
+  // error
+});
 ```
 
 
@@ -70,7 +99,7 @@ client.call('lodash', 'no_such_action', []).catch(console.error);
 #### inner gen-nodejs
 
 - `[options.adapter]` : optional {Object}, include:
-  - `name`='zookeeper' : 'redis' or 'zookeeper'
+  - `name='zookeeper'` : 'redis' or 'zookeeper'
   - `options`={} : redis: [node_redis](https://github.com/NodeRedis/node_redis) , zookeeper: [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper)
 - `[options.services]` : optional {Object|Array}, each service include:
   - `[alias]` : {Function|String} unique name of each service, or use `service.name` or `service.identity`
@@ -80,12 +109,10 @@ client.call('lodash', 'no_such_action', []).catch(console.error);
   - `[port]` : if null, thrift server bind to an unused port (increase from 7007)
   - `[host]` : if null, use ipv4 from eth0(linux) en0(osx)
 
-
-
 #### use-defined gen-nodejs
 
 - `[options.adapter]` : optional {Object}, include:
-  - `name`='zookeeper' : 'redis' or 'zookeeper'
+  - `name='zookeeper'` : 'redis' or 'zookeeper'
   - `options`={} : redis: [node_redis](https://github.com/NodeRedis/node_redis) , zookeeper: [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper)
 - ``[options.thrift]` : optional {Object}, include:
   - `[port]` : if null, thrift server bind to an unused port (increase from 7007)`
@@ -95,45 +122,48 @@ client.call('lodash', 'no_such_action', []).catch(console.error);
   - `handler`  gen-nodejs handler
   - `options` gen-nodejs options
 
-
-
 #### API
 
-- `.add(services)` : invalid with  'use-defined gen-nodejs'
-  - `services` just as `options.services`
-  - return {Promise|bluebird}
+- `.add(services)` : invalid with  'use-defined gen-nodejs', return {Promise|bluebird}
+  - `[alias]` : {Function|String} unique name of each service, or use `service.name` or `service.identity`
+  - `service` : {Object} origin service object
+  - `[actions]` : {Array|String} permissions, or allow all service actions, ONLY support PROMISE/SYNC
 - `.on(EVENT)` : 
-  - `listening` : server initial
-  - `log` : log info
-  - `error` : error info
-- `.server` get thrift.createServer
-- `.host` get host
-- `.port` get port
-
-
+  - `ready` : server initial `.on('ready', (info) => {...})`
+  - `debug` : debug log `.on('ready', (info) => {...})`
+  - `info` : info log, `.on('info', (info) => {...})`
+  - `error` : error log, `.on('info', (err) => {…})`
+- `.server()` get thrift.createServer
+- `.host()` get host
+- `.port()` get port
 
 ### ThriftClient(options) :
 
 - `[options.adapter]` : optional {Object}, include:
   - `name='zookeeper'` : 'redis' or 'zookeeper'
   - `options={}` : redis: [node_redis](https://github.com/NodeRedis/node_redis) , zookeeper: [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper)
+
 - `[options.thrifts]` : optional {Object}, for user-defined
   - `alias` // for search thrift server
-  - processor //  gen-nodejs thrift processor
+  - `processor` //  gen-nodejs thrift processor
+
 - `.call(alias, action, params, [callback])` : use inner `msg.thrift`
   - find all services (by `alias`), and create thrift tcp connection
   - polling thrift connections
   - return `result` with {Promise|bluebird} or `callback(err, result)`
+
 - `.call(alias, [callback])` : for `user-defined.thrift` return `thrift.createClient`
   - find all services (by `alias`), and create thrift tcp connection
   - polling thrift connections
   - return `client` with {Promise|bluebird} or `callback(err, client)`
+
 - `.on(EVENT)` : 
-  - `ready` : client ready
-  - `log` : log info
-  - `error` : error info
+  - `ready` : server initial `.on('ready', (info) => {...})`
+  - `debug` : debug log `.on('ready', (info) => {...})`
+  - `info` : info log, `.on('info', (info) => {...})`
+  - `error` : error log, `.on('info', (err) => {…})`
 
-
+    ​
 
 
 
