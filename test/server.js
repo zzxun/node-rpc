@@ -13,19 +13,18 @@ const ThriftServer = require('../index').ThriftServer,
       _            = require('lodash');
 
 // test
-let s = new ThriftServer({
-  services: [{
-    alias  : 'utils',
-    service: utils
-  }, {
-    service: _
-  }],
-  adapter: {
-    name: 'zookeeper'
-  }
-});
+let s = new ThriftServer();
 
 s.on('debug', console.log);
 s.on('info', console.log);
 s.on('error', console.error);
-s.on('ready', console.log);
+s.on('ready', (data) => {
+  console.log(data);
+
+  s.add([{
+    alias  : 'utils',
+    service: utils
+  }, {
+    service: _
+  }]);
+});
