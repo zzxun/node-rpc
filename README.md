@@ -15,6 +15,16 @@ Features:
 - caller search the services, using polling to manage thrift clients
 - client subscribe for new services
 
+
+
+# Install
+
+```shell
+npm install node-thrift-service
+```
+
+
+
 # USAGE
 
 `cd test` and run `node server`, `node client`.
@@ -81,7 +91,7 @@ client.on('error', console.error);
 
 client.on('ready', (info) => {
   console.log(info);
-  
+
   client.call('lodash', 'isString', ['a']).then(console.log);
   // true
   client.call('lodash', 'no_such_action', []).catch(console.error);
@@ -157,6 +167,7 @@ client.on('ready', (info) => {
   - `debug` : debug log `.on('ready', (info) => {...})`
   - `info` : info log, `.on('info', (info) => {...})`
   - `error` : error log, `.on('info', (err) => {…})`
+
 
 
 
