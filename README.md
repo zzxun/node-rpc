@@ -20,7 +20,6 @@ Features:
 `cd test` and run `node server`, `node client`.
 
 
-
 ThriftServer
 
 ``` javascript
@@ -142,28 +141,22 @@ client.on('ready', (info) => {
 - `[options.adapter]` : optional {Object}, include:
   - `name='zookeeper'` : 'redis' or 'zookeeper'
   - `options={}` : redis: [node_redis](https://github.com/NodeRedis/node_redis) , zookeeper: [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper)
-
 - `[options.thrifts]` : optional {Object}, for user-defined
   - `alias` // for search thrift server
   - `processor` //  gen-nodejs thrift processor
-
 - `.call(alias, action, params, [callback])` : use inner `msg.thrift`
   - find all services (by `alias`), and create thrift tcp connection
   - polling thrift connections
   - return `result` with {Promise|bluebird} or `callback(err, result)`
-
 - `.call(alias, [callback])` : for `user-defined.thrift` return `thrift.createClient`
   - find all services (by `alias`), and create thrift tcp connection
   - polling thrift connections
   - return `client` with {Promise|bluebird} or `callback(err, client)`
-
 - `.on(EVENT)` : 
   - `ready` : server initial `.on('ready', (info) => {...})`
   - `debug` : debug log `.on('ready', (info) => {...})`
   - `info` : info log, `.on('info', (info) => {...})`
   - `error` : error log, `.on('info', (err) => {…})`
-
-    ​
 
 
 
