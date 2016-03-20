@@ -18,7 +18,6 @@ Features:
 
 
 
-
 **Warning: Thrift Server will listening on a port, so you need to config your Firewalls**
 
 
@@ -118,7 +117,7 @@ client.on('ready', (info) => {
 - `[options.adapter]` : optional {Object}, include:
   - `name='zookeeper'` : {String} 'redis' or 'zookeeper'
   - `options`={} : redis: [node_redis](https://github.com/NodeRedis/node_redis) , zookeeper: [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper)
-- `[options.services]` : optional {Object|Array}, each service include:
+- `[options.services]` : optional {Object|Array}, each **service** include:
   - `[alias]` : {Function|String} unique name of each service, or use `service.name` or `service.identity`
   - `service` : {Object} origin service object
   - `[actions]` : {Array|String} permissions, or allow all service actions, ONLY support PROMISE/SYNC
@@ -159,14 +158,14 @@ client.on('ready', (info) => {
 - `[options.adapter]` : optional {Object}, include:
   - `name='zookeeper'` : {String} 'redis' or 'zookeeper'
   - `options={}` : {Object} redis: [node_redis](https://github.com/NodeRedis/node_redis) , zookeeper: [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper)
-- `[options.thrifts]` : optional {Object}, for **user-defined**
+- `[options.thrifts]` : optional {Object|Array}, if you use **user-defined.thrift**, you should give this params, each **thrift** include:
   - `alias` {String} // for search thrift server
   - `processor` {Object} //  gen-nodejs thrift processor
 - `.call(alias, action, params, [callback])` : use inner `msg.thrift`
   -  `alias` {String} service alias name
-  - `action` : {String} name of action
-  - `params` : {Array} params of `alias.action` 
-  - return `result` with {Promise|bluebird} or `callback(err, result)`
+  -  `action` : {String} name of action
+  -  `params` : {Array} params of `alias.action` 
+  -  return `result` with {Promise|bluebird} or `callback(err, result)`
 - `.call(alias, [callback])` : for **user-defined.thrift** return `thrift.createClient`
   - `alias` : {String} service alias name
   - return `client` with {Promise|bluebird} or `callback(err, client)`
@@ -175,7 +174,6 @@ client.on('ready', (info) => {
   - `debug` : debug log `.on('ready', (info) => {...})`
   - `info` : info log, `.on('info', (info) => {...})`
   - `error` : error log, `.on('info', (err) => {…})`
-
 
 # TEST
 
