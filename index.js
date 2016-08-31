@@ -4,5 +4,5 @@
  */
 'use strict';
 
-exports.ThriftServer = require('./lib/server').ThriftServer;
-exports.ThriftClient = require('./lib/client').ThriftClient;
+exports.Server = require('./lib/rpc').ThriftServer;
+exports.Client = require('./lib/rpc').ThriftClient;

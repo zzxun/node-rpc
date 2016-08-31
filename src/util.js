@@ -1,17 +1,15 @@
-/**
- * util common
- *
- * @author zzxun <xtkml.g@gmail.com>
- */
-'use strict';
+// Copyright (c) 2016 zzun <xtkml.g@gmail.com>
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
 
 /**
- * module dependencies
+ * util common
  */
-const _ = require('lodash');
-const os = require('os');
-const net = require('net');
-const Promises = require('bluebird');
+import _ from 'lodash';
+import { networkInterfaces } from 'os';
+import { createServer } from 'net';
+import Promise from 'bluebird';
 
 /**
  * get a random string
@@ -28,7 +26,7 @@ exports.randStr = randStr;
  * @type {Function}
  * @private
  */
-const _KEY = (data) => {
+const KEY = (data) => {
   if (!data.slash) {
     data.slash = '';
   }
@@ -37,7 +35,7 @@ const _KEY = (data) => {
   }
   return _.template('<%= slash %>__M:_THRIFT_SERVICES__<%= alias %>__<%= id %>')(data);
 };
-exports.KEY = _KEY;
+exports.KEY = KEY;
 
 /**
  * @return {string}
@@ -60,7 +58,7 @@ function getOriginKey(key) {
     return {
       slash: array[1],
       alias: array[2],
-      id   : array[3]
+      id: array[3],
     };
   }
   return null;
@@ -74,7 +72,7 @@ exports.getOriginKey = getOriginKey;
  */
 function getKey(key) {
   if (_.isObject(key)) {
-    return _KEY(key);
+    return KEY(key);
   }
   return key;
 }
@@ -95,11 +93,11 @@ const _NETWORK_KEYS = ['eth0', 'en0'];
 exports.EVENT = {
   LOG: {
     DEBUG: 'debug',
-    INFO : 'info',
-    ERROR: 'error'
+    INFO: 'info',
+    ERROR: 'error',
   },
 
-  READY: 'ready'
+  READY: 'ready',
 };
 
 /**
@@ -152,8 +150,8 @@ exports.exec = exec;
  * get local ipv4 ip address, using eth0 (linux) en0 (osx)
  */
 function getLocalIPv4() {
-  let nets = os.networkInterfaces(),
-      ip   = '127.0.0.1';
+  let nets = networkInterfaces(),
+    ip = '127.0.0.1';
 
   for (let key in nets) {
     if (nets.hasOwnProperty(key) && _.includes(_NETWORK_KEYS, key)) {
@@ -177,7 +175,7 @@ exports.getLocalIPv4 = getLocalIPv4;
  * @param {Function} callback
  */
 function isPortInUse(port, callback) {
-  let server = net.createServer();
+  let server = createServer();
   server.listen(port, function () {
     server.once('close', function () {
       callback(port);
@@ -196,7 +194,7 @@ exports.isPortInUse = isPortInUse;
  * @param {Number} port default start from 7007, or from use given
  */
 function getUnusedPort(port) {
-  return new Promises((resolve) => {
+  return new Promise((resolve) => {
     isPortInUse(port, (port) => {
       return resolve(port);
     });
@@ -252,13 +250,13 @@ class DLinkedList {
    * @returns {*}
    */
   append(data, id) {
-    let key     = data.id || id || randStr(),
-        newData = {
-          id: key,
-          data: data,
-          next: key,
-          prev: key
-        };
+    let key = data.id || id || randStr(),
+      newData = {
+        id: key,
+        data: data,
+        next: key,
+        prev: key,
+      };
     if (this._length === 0) { // the first one
       this._head = key;
       this._tail = key;
@@ -316,7 +314,7 @@ class DLinkedList {
     let cur = this._container.get(key);
     if (cur) {
       let prev = this._container.get(cur.prev),
-          next = this._container.get(cur.next);
+        next = this._container.get(cur.next);
       prev.next = cur.next;
       next.prev = cur.prev;
       if (this._head === cur.id) {
@@ -369,5 +367,3 @@ class DLinkedList {
 }
 
 exports.DLinkedList = DLinkedList;
-
-

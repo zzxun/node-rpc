@@ -3,7 +3,6 @@
  *
  * @author zzxun <xtkml.g@gmail.com>
  */
-'use strict';
 
 const _ = require('lodash');
 const thrift = require('thrift');
