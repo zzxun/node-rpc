@@ -3,7 +3,6 @@
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
 
-import merge from 'lodash/merge';
 import utils from './util';
 
 /**
@@ -18,21 +17,16 @@ class Protocol {
    *
    * @param {Object} options include:
    *   1. name {String} redis/zookeeper/..., default use zookeeper
-   *   2. rpc {String} distinguish thrift/grpc/...
    *   3. options {Object} options of each `require(${name})`
    */
   constructor(options) {
-    // merge default
-    options = merge({
-      name: 'zookeeper',
-      rpc: 'rpc',
-    }, options);
 
     try {
       // require
       let protocol = require(options.name);
       // init protocol
       this.protocol = new protocol(options);
+
     } catch (e) {
       throw new TypeError(`require error, please \`npm i ${options.name} --save\``);
     }

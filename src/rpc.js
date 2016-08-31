@@ -9,6 +9,7 @@ import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
 import Promise from 'bluebird';
 import utils from './util';
+import Protocol from './protocol';
 
 /**
  * Wrap thrift/grpc ... and provide
@@ -21,28 +22,36 @@ class BaseTransport {
   /**
    * initial
    *
-   * @param {Object} options include:
+   * @param {Object} rpcOpts include:
    *   name {String} thrift/grpc/...
    *   [host] {String} if createServer
    *   [port] {Number} if createServer
-   *   options {Object} options of each `require(${name})`
+   *   options {Object} options of each `require(${rpcOpts.name})`
+   * @param {Object} pocOpts include:
+   *   name {String} thrift/grpc/...
+   *   [host] {String} if createServer
+   *   [port] {Number} if createServer
+   *   options {Object} options of each `require(${pocOpts.name})`
    */
-  constructor(options) {
+  constructor(rpcOpts, pocOpts) {
 
     // merge default
-    options = merge({
-      name: 'thrift',
-    }, options);
+    rpcOpts = merge({ name: 'node-rpc-thrift' }, rpcOpts);
+    pocOpts = merge({ name: 'node-rpc-redis' }, pocOpts);
 
     try {
       // require
-      let rpc = require(options.name);
+      let rpc = require(rpcOpts.name);
       // this fields
-      this.rpc = new rpc(options);
+      this.rpc = new rpc(rpcOpts);
+      this.host = utils.getLocalIPv4();
 
     } catch (e) {
-      throw new TypeError(`require error, please \`npm i ${options.name} --save\``);
+      throw new TypeError(`require error, please \`npm i ${rpcOpts.name} --save\``);
     }
+
+    // protocol
+    this.protocol = new Protocol(pocOpts);
 
   }
 
@@ -56,14 +65,12 @@ class Server extends BaseTransport {
   /**
    * createServer
    */
-  constructor(options) {
-    super(options);
+  constructor(rpcOpts, pocOpts) {
+    super(rpcOpts, pocOpts);
 
     // services' map
     this.services = new Map();
-
-    this.port = typeof options.port === 'number' ? options.port : 7007;
-    this.host = utils.getLocalIPv4();
+    this.port = typeof rpcOpts.port === 'number' ? rpcOpts.port : 7007;
 
     this.createServer(); // listening
   }
@@ -78,13 +85,15 @@ class Server extends BaseTransport {
     self.port = await utils.getUnusedPort(self.port);
 
     // init server
-    self.server = self.rpc.createServer(self.host, self.port);
+    self.server = self.rpc.createServer(self.port);
     // events
     self.on = (event, cb) => {
       self.server.on(event, cb);
     };
 
-    self.register(self.handler);
+    self.id = self.host + ':' + self.port;
+
+    self.server.register(self.handler);
   }
 
   /**
@@ -94,7 +103,7 @@ class Server extends BaseTransport {
    * @param {String} action service.action
    * @param {Array} params service.action.apply(null, params)
    */
-  async handler(alias, action, params) {
+  async handler({ alias, action, params = {} }) {
     let self = this;
 
     try {
@@ -125,13 +134,11 @@ class Server extends BaseTransport {
    *   }
    * @return {*}
    */
-  register(s) {
+  async register({ alias, service, permission }) {
     let self = this;
 
     // alias/service/functions
-    let alias = s.alias,
-      service = s.service,
-      permission = utils.trans2Array(s.permission, isString);
+    permission = utils.trans2Array(permission, isString);
     // check alias
     alias = utils.exec((alias) ? alias : (service.name || service.identity));
 
@@ -149,7 +156,10 @@ class Server extends BaseTransport {
       });
     }
     // put to map
-    this.services.set(alias, { service, permit });
+    self.services.set(alias, { service, permit });
+
+    // publish
+    await self.protocol.publish(alias, { host: self.host, port: self.port, permit });
   }
 
 }
@@ -163,6 +173,142 @@ class Client extends BaseTransport {
 
   constructor(options) {
     super(options);
+
+    // manage clients
+    this.clients = new Map();
+  }
+
+  /**
+   * find clients from this.protocol
+   * 
+   * @param {String} alias service unique name
+   */
+  async findClient(alias) {
+    let self = this;
+
+    let client = self.clients.get(alias);
+    if (!client) {
+      // initial
+      self.clients.set(alias, new utils.DLinkedList());
+      self.subscribe(alias);
+      // get from protocol
+      let keys = await self.protocol.getListKeys({ alias: alias, id: '*' });
+      // no service found
+      if (isEmpty(keys)) {
+        return null;
+      }
+
+      await self.createClients(alias, keys);
+    }
+
+    // return one client
+    return client.next();
+  }
+
+  /**
+   * find services from this.protocol and createClients
+   * 
+   * @param {String} alias service unique name
+   * @param {Array} keys providers list of this alias 
+   */
+  async createClients(alias, keys) {
+    let self = this;
+
+    await self.protocol.getListValues(keys).map((data) => { // for each
+
+      try {
+        // parse and check
+        data = JSON.parse(data);
+
+        if (data && data.host && data.port) {
+          data.id = data.host + ':' + data.port;
+
+          // jump
+          if (self.clients.get(alias).item(data.id)) {
+            return null;
+          }
+          // set id
+          data.client = self.rpc.createClient(data);
+
+          // cannot connect
+          data.client.on('close', () => {
+            // delete from _adapter and _clients
+            self.clients.get(alias).remove(data.id);
+          });
+
+          // add
+          self.clients.get(alias).append(data);
+
+        }
+
+      } catch (e) {
+        // TODO: logs
+      }
+
+    });
+
+  }
+
+  /**
+   * subscribe new service
+   * 
+   * @param {String} alias service unique name
+   */
+  subscribe(alias) {
+    let self = this;
+
+    self.protocol.subscribe({ alias }, (error, keys) => {
+      let newKeys = [];
+      if (error) {
+        // TODO: logs
+        return;
+      }
+
+      keys.forEach((key) => {
+        let origin = utils.getOriginKey(key);
+        if (origin && (alias === origin.alias) && origin.id) {
+          if (self.clients.get(alias) && !self.clients.get(alias).item(origin.id)) {
+            newKeys.push(this.protocol.getKey({ alias: alias, id: origin.id }));
+          }
+        }
+      });
+
+      self.createClients(alias, newKeys);
+    });
+  }
+
+  /**
+   * call remote service[action](params)
+   * 
+   * @param {String} alias service unique name
+   * @param {String} action remote service[action]
+   * @param {Array} params remote function params
+   * 
+   * @return {Promise|bluebird|*}
+   */
+  async call(alias, action, params) {
+    let self = this;
+    try {
+      if (!alias) { // check alias
+        throw new Error(`Invalid alias: ${alias}`);
+      }
+
+      // get client
+      let client = await self.findClient(alias);
+      if (client) {
+        // check permission
+        if (client.permit && !client.permit[action]) {
+          return Promise.reject('action forbidden');
+        }
+
+        // doCall
+        return await client.client.doCall(alias, action, params);
+      }
+
+    } catch (err) {
+      return Promise.reject(err);
+    }
+
   }
 }
 
